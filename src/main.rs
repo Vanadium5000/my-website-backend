@@ -57,13 +57,12 @@ struct LoginRequest {
 struct Api;
 
 #[OpenApi]
-#[allow(unused_variables)]
 impl Api {
     // Register & return the user id in plain text
     #[oai(path = "/register", method = "post")]
     async fn register(
         &self,
-        server_key: Data<&ServerKey>,
+        _server_key: Data<&ServerKey>,
         pool: Data<&SqlitePool>,
         req: Json<LoginRequest>,
     ) -> Result<PlainText<String>> {
@@ -142,7 +141,7 @@ async fn main() -> Result<(), std::io::Error> {
 
     let pool = SqlitePool::connect("sqlite:db.sqlite3").await.unwrap();
     let api_service =
-        OpenApiService::new(Api, "Authorization Demo", "1.0").server("http://localhost:3000/api");
+        OpenApiService::new(Api, "My Website Backend", "1.0").server("http://localhost:3000/api");
     let ui = api_service.swagger_ui();
     let server_key: Hmac<Sha256> = Hmac::new_from_slice(SERVER_KEY).expect("valid server key");
     let app = Route::new()
