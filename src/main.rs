@@ -20,7 +20,7 @@ const SERVER_KEY: &[u8] = b"123456";
 type ServerKey = Hmac<Sha256>;
 
 // User type
-#[derive(Debug, Serialize, Deserialize, poem_openapi::Object)]
+#[derive(Debug, Serialize, Deserialize, Object)]
 struct User {
     user_id: i64,
     username: String,
@@ -39,10 +39,10 @@ async fn api_checker(req: &Request, bearer: Bearer) -> Option<User> {
 // Define the API response enums with success and error cases
 #[derive(ApiResponse)]
 enum LoginResponse {
-    /// User found successfully
+    /// Valid credentials
     #[oai(status = 200)]
     Ok(PlainText<String>),
-    /// User not found
+    /// Invalid credentials
     #[oai(status = 404)]
     NotFound(PlainText<String>),
 }
@@ -143,10 +143,13 @@ async fn main() -> Result<(), std::io::Error> {
     let api_service =
         OpenApiService::new(Api, "My Website Backend", "1.0").server("http://localhost:3000/api");
     let ui = api_service.swagger_ui();
+    let spec = api_service.spec_endpoint();
+
     let server_key: Hmac<Sha256> = Hmac::new_from_slice(SERVER_KEY).expect("valid server key");
     let app = Route::new()
         .nest("/api", api_service)
         .nest("/", ui)
+        .nest("/openapi.json", spec)
         .data(server_key)
         .data(pool);
 
