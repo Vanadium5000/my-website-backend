@@ -12,6 +12,7 @@ pub type ServerKey = Hmac<Sha256>;
 pub struct User {
     pub user_id: i64,
     pub username: String,
+    pub is_admin: bool,
 }
 
 /// ApiKey authorization

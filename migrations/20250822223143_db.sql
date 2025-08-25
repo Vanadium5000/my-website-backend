@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS blog_posts (
     snippet TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (DATETIME('now')),
     likes INTEGER NOT NULL DEFAULT 0,
-    dislikes INTEGER NOT NULL DEFAULT 0
+    dislikes INTEGER NOT NULL DEFAULT 0,
+    comments INTEGER NOT NULL DEFAULT 0
 );
 
 -- Blog comments
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS comments (
     user_id INTEGER NOT NULL,
     content TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (DATETIME('now')),
+    is_accepted BOOLEAN NOT NULL DEFAULT 0,
     FOREIGN KEY (post_id) REFERENCES blog_posts(post_id) ON DELETE CASCADE
 );
 

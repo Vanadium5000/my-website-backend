@@ -73,7 +73,7 @@ impl AuthApi {
         // Find user with same username/password_hash
         let user: Option<User> = sqlx::query_as!(
             User,
-            "SELECT user_id, username FROM users WHERE username = ? AND password_hash = ?",
+            "SELECT user_id, username, is_admin FROM users WHERE username = ? AND password_hash = ?",
             req.0.username,
             password_hash_string
         )
@@ -94,6 +94,7 @@ impl AuthApi {
                 let token = User {
                     user_id: user.user_id,
                     username: user.username,
+                    is_admin: user.is_admin,
                 }
                 .sign_with_key(server_key.0)
                 .map_err(InternalServerError)?;

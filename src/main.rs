@@ -1,6 +1,6 @@
 // src/main.rs
 use hmac::{Hmac, Mac};
-use poem::{EndpointExt, Route, listener::TcpListener, middleware::Cors};
+use poem::{EndpointExt, Route, get, listener::TcpListener, middleware::Cors};
 use poem_openapi::OpenApiService;
 use sqlx::SqlitePool;
 
@@ -9,12 +9,14 @@ mod auth;
 mod blog;
 mod common;
 mod general;
+mod projects;
 
 use admin::AdminApi;
 use auth::AuthApi;
 use blog::BlogApi;
 use common::ServerKey;
 use general::GeneralApi;
+use projects::chess;
 
 const SERVER_KEY: &[u8] = b"123456";
 
@@ -52,6 +54,10 @@ async fn main() -> Result<(), std::io::Error> {
         .nest("/admin_api", admin_api_service)
         .nest("/admin", admin_ui)
         .nest("/admin_openapi.json", admin_spec)
+        .at(
+            "/ws/:name",
+            get(chess::ws.data(tokio::sync::broadcast::channel::<String>(32).0)),
+        )
         .data(server_key)
         .data(pool)
         .with(cors); // Apply CORS middleware

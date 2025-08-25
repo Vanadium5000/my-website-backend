@@ -39,15 +39,7 @@ impl AdminApi {
         auth: BearerTokenAuthorization,
         req: Json<BlogCreateRequest>,
     ) -> Result<BlogCreateResponse, poem::Error> {
-        let is_admin = sqlx::query_scalar!(
-            "SELECT is_admin FROM users WHERE username = ?",
-            auth.0.username,
-        )
-        .fetch_one(pool.0)
-        .await
-        .map_err(InternalServerError)?; // Return InternalServerError if sqlx errors
-
-        if !is_admin {
+        if !auth.0.is_admin {
             return Ok(BlogCreateResponse::Unauthorized(PlainText(
                 "invalid permissions".to_string(),
             )));

@@ -21,6 +21,14 @@ struct Blog {
     created_at: String,
 }
 
+/// Comment
+#[derive(Debug, Serialize, Deserialize, Object)]
+struct Comment {
+    content: String,
+    created_at: String,
+    user_id: i64,
+}
+
 /// Blog ID
 #[derive(Object)]
 struct BlogGetRequest {
@@ -174,53 +182,6 @@ impl BlogApi {
         return Ok(PlainText("success".to_string()));
     }
 
-    /// Comment on a post
-    #[oai(path = "/post_dislike", method = "post")]
-    async fn comment(
-        &self,
-        pool: Data<&SqlitePool>,
-        auth: BearerTokenAuthorization,
-        req: Json<BlogGetRequest>,
-    ) -> Result<PlainText<String>, poem::Error> {
-        let reaction = user_reaction(&pool, auth.0.user_id, req.0.post_id).await?;
-        let like_difference = if reaction.0 { -1 } else { 0 };
-        let dislike_difference = if reaction.1 { -1 } else { 1 };
-        let is_now_dislike = !reaction.1;
-
-        // Increment or decrease blog's like count
-        sqlx::query!(
-            "UPDATE blog_posts SET likes = likes + ?, dislikes = dislikes + ? WHERE post_id = ?",
-            like_difference,
-            dislike_difference,
-            req.0.post_id
-        )
-        .execute(pool.0)
-        .await
-        .map_err(InternalServerError)?; // Return InternalServerError if sqlx errors
-
-        if is_now_dislike {
-            sqlx::query!(
-                "INSERT INTO user_reactions (user_id, post_id, is_like) VALUES (?, ?, false) ON CONFLICT(user_id, post_id) DO UPDATE SET is_like = false;",
-                auth.0.user_id,
-                req.0.post_id
-            )
-             .execute(pool.0)
-        .await
-        .map_err(InternalServerError)?; // Return InternalServerError if sqlx errors
-        } else {
-            sqlx::query!(
-                "DELETE FROM user_reactions WHERE user_id = ? AND post_id = ?;",
-                auth.0.user_id,
-                req.0.post_id
-            )
-            .execute(pool.0)
-            .await
-            .map_err(InternalServerError)?; // Return InternalServerError if sqlx errors
-        }
-
-        return Ok(PlainText("success".to_string()));
-    }
-
     /// Dislike the post if not already disliked, undislike the post if, and remove any likes
     #[oai(path = "/post_dislike", method = "post")]
     async fn dislike(
@@ -266,5 +227,46 @@ impl BlogApi {
         }
 
         return Ok(PlainText("success".to_string()));
+    }
+
+    /// Comment on the post
+    #[oai(path = "/post_comment", method = "post")]
+    async fn comment(
+        &self,
+        pool: Data<&SqlitePool>,
+        auth: BearerTokenAuthorization,
+        req: Json<BlogCommentRequest>,
+    ) -> Result<PlainText<String>, poem::Error> {
+        sqlx::query!(
+            "INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?);",
+            req.0.post_id,
+            auth.0.user_id,
+            req.0.content
+        )
+        .execute(pool.0)
+        .await
+        .map_err(InternalServerError)?; // Return InternalServerError if sqlx errors
+
+        return Ok(PlainText("success".to_string()));
+    }
+
+    /// Get comments on the post with the inputted post_id
+    #[oai(path = "/post_comments", method = "post")]
+    async fn get_comments(
+        &self,
+        pool: Data<&SqlitePool>,
+        req: Json<BlogGetRequest>,
+    ) -> Result<Json<Vec<Comment>>, poem::Error> {
+        // Fetch all post comments
+        let comments = sqlx::query_as!(
+            Comment,
+            "SELECT content, created_at, user_id FROM comments WHERE post_id = ? AND is_accepted = ?",
+            req.0.post_id,
+            true
+        )
+        .fetch_all(pool.0)
+        .await
+        .map_err(InternalServerError)?; // Return InternalServerError if sqlx errors
+        Ok(Json(comments))
     }
 }
