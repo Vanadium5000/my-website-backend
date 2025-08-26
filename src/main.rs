@@ -4,6 +4,11 @@ use poem::{EndpointExt, Route, get, listener::TcpListener, middleware::Cors};
 use poem_openapi::OpenApiService;
 use sqlx::SqlitePool;
 
+// Websocket stuff
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::{RwLock, mpsc};
+
 mod admin;
 mod auth;
 mod blog;
@@ -40,11 +45,11 @@ async fn main() -> Result<(), std::io::Error> {
     let admin_spec = admin_api_service.spec_endpoint();
 
     // Configure CORS
-    let cors = Cors::new()
-        .allow_origins(vec!["http://localhost:5173", "http://localhost:3000"]) // Allow your frontend's origin
-        .allow_methods(vec!["GET", "POST"]) // Allow specific methods
-        .allow_headers(vec!["Authorization", "Content-Type"]) // Allow specific headers
-        .allow_credentials(true); // Allow cookies/credentials if needed
+    // let cors = Cors::new()
+    //     .allow_origins(vec!["http://localhost:5173", "http://localhost:3000"]) // Allow your frontend's origin
+    //     .allow_methods(vec!["GET", "POST"]) // Allow specific methods
+    //     .allow_headers(vec!["Authorization", "Content-Type"]) // Allow specific headers
+    //     .allow_credentials(true); // Allow cookies/credentials if needed
 
     let server_key: ServerKey = Hmac::new_from_slice(SERVER_KEY).expect("valid server key");
     let app = Route::new()
@@ -55,12 +60,14 @@ async fn main() -> Result<(), std::io::Error> {
         .nest("/admin", admin_ui)
         .nest("/admin_openapi.json", admin_spec)
         .at(
-            "/ws/:name",
-            get(chess::ws.data(tokio::sync::broadcast::channel::<String>(32).0)),
+            "/ws/:token",
+            get(chess::ws.data(Arc::new(RwLock::new(
+                HashMap::<String, mpsc::Sender<String>>::new(),
+            )))),
         )
         .data(server_key)
-        .data(pool)
-        .with(cors); // Apply CORS middleware
+        .data(pool);
+    // .with(cors); // Apply CORS middleware
 
     poem::Server::new(TcpListener::bind("0.0.0.0:3000"))
         .run(app)

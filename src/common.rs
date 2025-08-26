@@ -24,3 +24,7 @@ pub async fn api_checker(req: &Request, bearer: Bearer) -> Option<User> {
     let server_key = req.data::<ServerKey>().unwrap();
     VerifyWithKey::<User>::verify_with_key(bearer.token.as_str(), server_key).ok()
 }
+
+pub async fn verify_token(server_key: ServerKey, token: String) -> Option<User> {
+    VerifyWithKey::<User>::verify_with_key(token.as_str(), &server_key).ok()
+}
