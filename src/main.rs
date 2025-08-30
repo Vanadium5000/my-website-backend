@@ -60,7 +60,7 @@ async fn main() -> Result<(), std::io::Error> {
         .nest("/admin", admin_ui)
         .nest("/admin_openapi.json", admin_spec)
         .at(
-            "/ws/:game_id/:token",
+            "/ws/:token",
             get(chess::ws
                 .data(Arc::new(RwLock::new(
                     HashMap::<String, mpsc::Sender<String>>::new(),
