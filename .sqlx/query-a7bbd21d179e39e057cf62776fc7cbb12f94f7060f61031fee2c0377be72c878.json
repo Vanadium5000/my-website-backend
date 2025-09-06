@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT is_like FROM user_reactions WHERE user_id = ? AND post_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "is_like",
+        "ordinal": 0,
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a7bbd21d179e39e057cf62776fc7cbb12f94f7060f61031fee2c0377be72c878"
+}

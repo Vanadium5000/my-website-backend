@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE blog_posts SET likes = likes + ?, dislikes = dislikes + ? WHERE post_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "950eb32110497e70b696fb7514089d1dc39ce11f9dad0e95752e654d5ae2b0a1"
+}

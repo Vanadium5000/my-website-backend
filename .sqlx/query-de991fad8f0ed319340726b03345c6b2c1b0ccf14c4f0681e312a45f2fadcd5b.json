@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO user_reactions (user_id, post_id, is_like) VALUES (?, ?, false) ON CONFLICT(user_id, post_id) DO UPDATE SET is_like = false;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "de991fad8f0ed319340726b03345c6b2c1b0ccf14c4f0681e312a45f2fadcd5b"
+}

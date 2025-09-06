@@ -1,0 +1,56 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT post_id, title, content, snippet, likes, dislikes, created_at FROM blog_posts WHERE post_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "post_id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "title",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "content",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "snippet",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "likes",
+        "ordinal": 4,
+        "type_info": "Integer"
+      },
+      {
+        "name": "dislikes",
+        "ordinal": 5,
+        "type_info": "Integer"
+      },
+      {
+        "name": "created_at",
+        "ordinal": 6,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "92632106f3bcb4fc812d7f879753a6be82174b692991b63372903b814db9e421"
+}

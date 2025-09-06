@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM user_reactions WHERE user_id = ? AND post_id = ?;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "de9aad750a34de16df825ad0978e47d63676b9a93e4e7a5cef5da6eb8bd94c0b"
+}
