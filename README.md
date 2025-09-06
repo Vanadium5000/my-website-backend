@@ -39,3 +39,9 @@ cargo run
 ```bash
 cargo sqlx migrate add "db"
 ```
+
+2. Create a random SERVER_KEY for JWT
+
+```bash
+openssl rand -base64 32
+```

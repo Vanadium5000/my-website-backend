@@ -54,7 +54,9 @@ async fn main() -> Result<(), std::io::Error> {
     //     .allow_headers(vec!["Authorization", "Content-Type"]) // Allow specific headers
     //     .allow_credentials(true); // Allow cookies/credentials if needed
 
-    let server_key: ServerKey = Hmac::new_from_slice(SERVER_KEY).expect("valid server key");
+    let server_key_string = std::env::var("SERVER_KEY").unwrap_or_else(|_| "1234".to_string());
+    let server_key: ServerKey =
+        Hmac::new_from_slice(server_key_string.as_bytes()).expect("valid server key");
     let app = Route::new()
         .nest("/api", api_service)
         .nest("/", ui)
