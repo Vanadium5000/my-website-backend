@@ -1,5 +1,5 @@
 target/
-result/
+result
 .direnv/
 db.sqlite3
 db.sqlite3-shm

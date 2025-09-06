@@ -43,6 +43,7 @@
             clippy
             pkg-config
             openssl
+            sqlx-cli # Added for local migration management
           ];
         };
 
@@ -71,9 +72,9 @@
 
             databaseUrl = lib.mkOption {
               type = lib.types.str;
-              description = "Database URL for the service (e.g., sqlite://user:pass@host/db)";
-              example = "sqlite://db.sqlite3";
-              default = "sqlite://db.sqlite3";
+              default = "sqlite:///var/lib/rust-backend/db.sqlite";
+              description = "Database URL for the service. For SQLite, use an absolute path like 'sqlite:///var/lib/rust-backend/db.sqlite'.";
+              example = "sqlite:///var/lib/rust-backend/db.sqlite";
             };
 
             serverKey = lib.mkOption {
@@ -82,6 +83,8 @@
               example = "123456";
               default = "123456";
             };
+
+            enableMigrations = lib.mkEnableOption "Run SQLx migrations on service startup";
 
             package = lib.mkOption {
               type = lib.types.package;
@@ -102,8 +105,12 @@
               serviceConfig = {
                 ExecStart = "${cfg.package}/bin/my-website-backend"; # Adjust binary name if different (from Cargo.toml)
                 Restart = "always";
-                User = "root"; # Consider creating a dedicated user for security
+                User = "root"; # Optional fallback; DynamicUser overrides this
                 DynamicUser = true; # For better isolation
+                StateDirectory = "rust-backend"; # Creates /var/lib/rust-backend owned by the user
+
+                # Run migrations before starting if enabled
+                ExecStartPre = lib.mkIf cfg.enableMigrations "${pkgs.sqlx-cli}/bin/sqlx migrate run --source ${self}/migrations";
               };
             };
 
