@@ -29,7 +29,10 @@ const SERVER_KEY: &[u8] = b"123456";
 async fn main() -> Result<(), std::io::Error> {
     tracing_subscriber::fmt::init();
 
-    let pool = SqlitePool::connect("sqlite:db.sqlite3").await.unwrap();
+    let database_url =
+        std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite:db.sqlite3".to_string());
+    let pool = SqlitePool::connect(&database_url).await.unwrap();
+
     let api_service = OpenApiService::new(
         (AuthApi {}, GeneralApi {}, BlogApi {}),
         "My Website Backend",
