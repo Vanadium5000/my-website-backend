@@ -76,6 +76,13 @@
               default = "sqlite://db.sqlite3";
             };
 
+            serverKey = lib.mkOption {
+              type = lib.types.str;
+              description = "SERVER_KEY for JWT authentication for the service";
+              example = "123456";
+              default = "123456";
+            };
+
             package = lib.mkOption {
               type = lib.types.package;
               default = self.packages.${pkgs.system}.default;
@@ -90,6 +97,7 @@
               after = [ "network.target" ];
               environment = {
                 DATABASE_URL = cfg.databaseUrl;
+                SERVER_KEY = cfg.serverKey;
               };
               serviceConfig = {
                 ExecStart = "${cfg.package}/bin/my-website-backend"; # Adjust binary name if different (from Cargo.toml)
