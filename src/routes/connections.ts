@@ -227,4 +227,5 @@ export const connectionsRoutes = new Elysia({ prefix: "/connections" })
         security: [{ session: [] }],
       },
     }
-  );
+  )
+  .model({ ConnectionsResponseSchema });
