@@ -342,4 +342,5 @@ export const quizspireRoutes = new Elysia({ prefix: "/quizspire" })
         security: [{ session: [] }],
       },
     }
-  );
+  )
+  .model({ FlashcardDeckSchema });
