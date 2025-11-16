@@ -45,7 +45,9 @@ const app = new Elysia()
   )
   .use(
     cors({
-      origin: "http://localhost:5173", // Allow requests from your frontend
+      origin: process.env.CORS_ORIGINS
+        ? process.env.CORS_ORIGINS.split(",")
+        : ["http://localhost:5173"], // Allow requests from your frontend
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow specific HTTP methods
       allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
       credentials: true, // Allow cookies or credentials if needed
@@ -78,7 +80,7 @@ setupConnections(io.of("/sockets/connection")); // Set up connections on /socket
 setupQuizspire(io.of("/sockets/quizspire")); // Set up quizspire handlers on /sockets/quizspire
 
 export default {
-  port: 3000,
+  port: parseInt(process.env.PORT || "3000"),
   idleTimeout: 30, // Adjust based on your needs (must exceed pingInterval)
   fetch(req: Request, server: any) {
     const url = new URL(req.url);

@@ -3,6 +3,9 @@
 # data
 data/
 
+# nix build
+result
+
 # dependencies
 /node_modules
 /.pnp
