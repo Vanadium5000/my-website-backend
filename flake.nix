@@ -100,7 +100,10 @@
             };
             corsOrigins = mkOption {
               type = types.listOf types.str;
-              default = [ "http://localhost:5173" ];
+              default = [
+                "http://localhost:5173"
+                "https://my-website.space"
+              ];
               description = "Allowed CORS origins";
             };
             user = mkOption {
