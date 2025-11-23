@@ -126,7 +126,12 @@ async function uploadImage(
     filename = `${userId}_${timestamp}_${sanitized}.${ext}`;
   }
 
-  const filepath = path.join("data", "images", filename);
+  const filepath = path.join(
+    process.env.DATA_DIR || "",
+    "data",
+    "images",
+    filename
+  );
 
   // Ensure directory exists
   await fs.mkdir(path.dirname(filepath), { recursive: true });
