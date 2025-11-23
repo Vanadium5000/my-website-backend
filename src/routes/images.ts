@@ -3,25 +3,13 @@ import { connectToDatabase } from "../db/connect";
 import { auth } from "../auth";
 import { rateLimit } from "elysia-rate-limit";
 import { ObjectId } from "mongodb";
-
-let sharp: any = null;
-try {
-  sharp = await import("sharp");
-} catch {
-  // Sharp not available, skip image processing
-}
-
+import { Jimp } from "jimp";
 import { promises as fs } from "node:fs";
-import { randomBytes } from "node:crypto";
 import path from "node:path";
-import https from "node:https";
-import http from "node:http";
 
 const { userCollection } = await connectToDatabase();
 const usersCollection = userCollection;
-
 const dataDir = process.env.DATA_DIR || "data";
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_COMPRESSED_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_USER_STORAGE = 100 * 1024 * 1024; // 100MB
@@ -69,6 +57,7 @@ async function uploadImage(
   const user = await usersCollection.findOne({
     _id: new ObjectId(userId),
   });
+
   if (!user) {
     throw new Error("Failed to initialize user data");
   }
@@ -86,35 +75,22 @@ async function uploadImage(
     throw new Error("Daily upload limit exceeded");
   }
 
-  // Process image with sharp if available
+  // Process image with Jimp
   let processedBuffer: Buffer = imageBuffer;
-  if (sharp) {
-    let quality = 80;
-    let attempt = 0;
-    const maxAttempts = 10;
+  const image = await Jimp.read(imageBuffer);
+  let quality = 80;
+  let attempt = 0;
+  const maxAttempts = 10;
 
-    do {
-      processedBuffer = await sharp
-        .default(imageBuffer)
-        .jpeg({ quality, mozjpeg: true })
-        .toBuffer();
+  do {
+    processedBuffer = await image.clone().getBuffer("image/jpeg", { quality });
+    if (processedBuffer.length <= MAX_COMPRESSED_SIZE) break;
+    quality -= 5;
+    attempt++;
+  } while (quality > 10 && attempt < maxAttempts);
 
-      if (processedBuffer.length <= MAX_COMPRESSED_SIZE) break;
-
-      quality -= 5;
-      attempt++;
-    } while (quality > 10 && attempt < maxAttempts);
-
-    if (processedBuffer.length > MAX_COMPRESSED_SIZE) {
-      throw new Error("Unable to compress image under 2MB");
-    }
-  } else {
-    // If sharp not available, check size and skip compression
-    if (imageBuffer.length > MAX_COMPRESSED_SIZE) {
-      throw new Error(
-        "Image too large after potential processing. Maximum 2MB"
-      );
-    }
+  if (processedBuffer.length > MAX_COMPRESSED_SIZE) {
+    throw new Error("Unable to compress image under 2MB");
   }
 
   // Generate filename (sanitize original filename if provided)
@@ -124,7 +100,8 @@ async function uploadImage(
 
   // Sanitize filename if provided
   if (originalFilename) {
-    const sanitized = originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const originalBase = path.parse(originalFilename).name; // Remove extension
+    const sanitized = originalBase.replace(/[^a-zA-Z0-9._-]/g, "_");
     filename = `${userId}_${timestamp}_${sanitized}.${ext}`;
   }
 
@@ -183,65 +160,38 @@ export async function downloadAndUploadImage(
     throw new Error("Only HTTP and HTTPS URLs are allowed");
   }
 
-  // Download the image
-  const chunks: Buffer[] = [];
-  let totalSize = 0;
-  let mimeType = "";
-
+  // Download the image using fetch
   try {
-    const response = await new Promise<http.IncomingMessage>(
-      (resolve, reject) => {
-        const client = url.protocol === "https:" ? https : http;
-        const req = client.get(
-          url,
-          {
-            headers: {
-              "User-Agent": "BetterAuth-Backend/1.0",
-            },
-            timeout: 30000, // 30 second timeout
-          },
-          (res) => {
-            if (res.statusCode !== 200) {
-              reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
-              return;
-            }
+    const response = await fetch(imageUrl, {
+      headers: {
+        "User-Agent": "BetterAuth-Backend/1.0",
+      },
+    });
 
-            // Check content type
-            const contentType = res.headers["content-type"];
-            if (!contentType || !contentType.startsWith("image/")) {
-              reject(new Error("URL does not point to an image"));
-              return;
-            }
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
 
-            mimeType = contentType.split(";")[0].toLowerCase();
+    // Check content type
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.startsWith("image/")) {
+      throw new Error("URL does not point to an image");
+    }
 
-            res.on("data", (chunk) => {
-              totalSize += chunk.length;
-              if (totalSize > MAX_FILE_SIZE) {
-                res.destroy();
-                reject(new Error("Image too large. Maximum size is 5MB"));
-                return;
-              }
-              chunks.push(chunk);
-            });
+    const mimeType = contentType.split(";")[0].toLowerCase();
 
-            res.on("end", () => {
-              resolve(res);
-            });
+    // Check content length if available
+    const contentLength = response.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
+      throw new Error("Image too large. Maximum size is 5MB");
+    }
 
-            res.on("error", reject);
-          }
-        );
+    const arrayBuffer = await response.arrayBuffer();
+    const imageBuffer = Buffer.from(arrayBuffer);
 
-        req.on("error", reject);
-        req.on("timeout", () => {
-          req.destroy();
-          reject(new Error("Download timeout"));
-        });
-      }
-    );
-
-    const imageBuffer = Buffer.concat(chunks);
+    if (imageBuffer.length > MAX_FILE_SIZE) {
+      throw new Error("Image too large. Maximum size is 5MB");
+    }
 
     // Extract filename from URL for sanitization
     const pathname = url.pathname;
@@ -293,10 +243,12 @@ export const imageRoutes = new Elysia({ prefix: "/images" })
       try {
         const file = await image.arrayBuffer();
         const mimeType = image.type;
+        const originalFilename = image.name;
         const result = await uploadImage(
           currentUser.id,
           Buffer.from(file),
-          mimeType
+          mimeType,
+          originalFilename
         );
         return result;
       } catch (error) {
@@ -348,14 +300,14 @@ export const imageRoutes = new Elysia({ prefix: "/images" })
       }
 
       try {
-        const files = await fs.readdir("data/images");
+        const files = await fs.readdir(path.join(dataDir, "images"));
         const userImages = files
           .filter((f) => f.startsWith(`${currentUser.id}_`))
           .map((f) => ({
             id: f,
             filename: f,
             url: `/images/${f}`,
-            uploadedAt: parseInt(f.split("_")[1].split(".")[0]),
+            uploadedAt: parseInt(f.split("_")[1].split(".")[0] || "0"),
           }))
           .sort((a, b) => b.uploadedAt - a.uploadedAt);
 
@@ -393,20 +345,9 @@ export const imageRoutes = new Elysia({ prefix: "/images" })
   )
   .get(
     "/:imageId",
-    async ({ params: { imageId }, currentUser, set }) => {
-      // Authentication not necessary
-      // if (!currentUser) {
-      //   set.status = 401;
-      //   return { error: "Unauthorized" };
-      // }
-
-      // Validate filename belongs to current user
-      // if (!imageId.startsWith(`${currentUser.id}_`)) {
-      //   set.status = 403;
-      //   return { error: "Access denied: You can only access your own images" };
-      // }
-
+    async ({ params: { imageId }, set }) => {
       const filepath = path.join(dataDir, "images", imageId);
+
       try {
         await fs.access(filepath);
         const file = Bun.file(filepath);
@@ -424,21 +365,14 @@ export const imageRoutes = new Elysia({ prefix: "/images" })
       }),
       response: {
         200: t.Any(), // File response
-        401: t.Object({
-          error: t.String(),
-        }),
-        403: t.Object({
-          error: t.String(),
-        }),
         404: t.Object({
           error: t.String(),
         }),
       },
       detail: {
         summary: "Get an image file",
-        description: "Serves an image file if the authenticated user owns it.",
+        description: "Serves an image file.",
         tags: ["images"],
-        security: [{ session: [] }],
       },
     }
   )
