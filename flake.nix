@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    bun2nix.url = "github:baileyluTCD/bun2nix";
+    bun2nix.url = "github:nix-community/bun2nix";
   };
 
   outputs =
@@ -19,30 +19,20 @@
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        inherit (bun2nix.lib.${system}) mkBunDerivation;
+        inherit (bun2nix.packages.${system}.default) mkDerivation fetchBunDeps;
 
-        backendPackage = mkBunDerivation {
+        backendPackage = mkDerivation {
           pname = "my-website-backend";
           version = "1.0.50";
           src = ./.;
           packageJson = ./package.json;
+          module = "src/index.ts";
 
           # Compile command:
-          # nix run github:baileyluTCD/bun2nix -- --lock-file bun.lock --output-file bun.nix
-          bunNix = ./bun.nix;
-
-          nativeBuildInputs = with pkgs; [ bun ];
-
-          # Optional: Add build steps if your app needs bundling/compilation beyond deps
-          buildPhase = ''
-            # e.g., bun build src/index.ts --outfile $out/bin/server
-          '';
-
-          installPhase = ''
-            mkdir -p $out
-            cp -r . $out/
-            cp -r node_modules $out/node_modules  # Installed by mkBunDerivation
-          '';
+          # nix run github:nix-community/bun2nix -- --lock-file bun.lock --output-file bun.nix
+          bunDeps = fetchBunDeps {
+            bunNix = ./bun.nix;
+          };
 
           meta = with pkgs.lib; {
             description = "Backend for my-website";

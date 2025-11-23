@@ -3,7 +3,8 @@
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "postinstall": "bun2nix -o bun.nix"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",
@@ -29,10 +30,11 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@types/bun": "^1.3.3",
     "@types/jsdom": "^27.0.0",
     "@types/nodemailer": "^7.0.2",
     "@types/web-push": "^3.6.4",
-    "@types/bun": "latest"
+    "bun2nix": "^2.0.1"
   },
   "peerDependencies": {
     "typescript": "^5"

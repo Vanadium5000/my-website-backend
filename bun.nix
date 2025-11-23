@@ -581,9 +581,9 @@
      url = "https://registry.npmjs.org/@tokenizer/token/-/token-0.3.0.tgz";
      hash = "sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==";
   };
-  "@types/bun@1.3.1" = fetchurl {
-     url = "https://registry.npmjs.org/@types/bun/-/bun-1.3.1.tgz";
-     hash = "sha512-4jNMk2/K9YJtfqwoAa28c8wK+T7nvJFOjxI4h/7sORWcypRNxBpr+TPNaCfVWq70tLCJsqoFwcf0oI0JU/fvMQ==";
+  "@types/bun@1.3.3" = fetchurl {
+     url = "https://registry.npmjs.org/@types/bun/-/bun-1.3.3.tgz";
+     hash = "sha512-ogrKbJ2X5N0kWLLFKeytG0eHDleBYtngtlbu9cyBKFtNL3cnpDZkNdQj8flVf6WTZUX5ulI9AY1oa7ljhSrp+g==";
   };
   "@types/cors@2.8.19" = fetchurl {
      url = "https://registry.npmjs.org/@types/cors/-/cors-2.8.19.tgz";
@@ -612,10 +612,6 @@
   "@types/prismjs@1.26.5" = fetchurl {
      url = "https://registry.npmjs.org/@types/prismjs/-/prismjs-1.26.5.tgz";
      hash = "sha512-AUZTa7hQ2KY5L7AmtSiqxlhWxb4ina0yd8hNbl4TWuqnv/pFP0nDMb3YrfSBf4hJVGLh2YEIBfKaBW/9UEl6IQ==";
-  };
-  "@types/react@19.2.2" = fetchurl {
-     url = "https://registry.npmjs.org/@types/react/-/react-19.2.2.tgz";
-     hash = "sha512-6mDvHUFSjyT2B2yeNx2nUgMxh9LtOWvkhIU3uePn2I2oyNymUAX1NIsdgviM4CH+JSrp2D2hsMvJOkxY+0wNRA==";
   };
   "@types/tough-cookie@4.0.5" = fetchurl {
      url = "https://registry.npmjs.org/@types/tough-cookie/-/tough-cookie-4.0.5.tgz";
@@ -713,9 +709,13 @@
      url = "https://registry.npmjs.org/buffer/-/buffer-6.0.3.tgz";
      hash = "sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==";
   };
-  "bun-types@1.3.1" = fetchurl {
-     url = "https://registry.npmjs.org/bun-types/-/bun-types-1.3.1.tgz";
-     hash = "sha512-NMrcy7smratanWJ2mMXdpatalovtxVggkj11bScuWuiOoXTiKIu2eVS1/7qbyI/4yHedtsn175n4Sm4JcdHLXw==";
+  "bun-types@1.3.3" = fetchurl {
+     url = "https://registry.npmjs.org/bun-types/-/bun-types-1.3.3.tgz";
+     hash = "sha512-z3Xwlg7j2l9JY27x5Qn3Wlyos8YAp0kKRlrePAOjgjMGS5IG6E7Jnlx736vH9UVI4wUICwwhC9anYL++XeOgTQ==";
+  };
+  "bun2nix@2.0.1" = fetchurl {
+     url = "https://registry.npmjs.org/bun2nix/-/bun2nix-2.0.1.tgz";
+     hash = "sha512-DYRxOPa+HP2cpJWYFigytOiG6u0Jq/wyD2fbdlmGvJ1vxzigLGLzMmnv/pbt5t8W3CUxxypdaEVS7bUitGTJyQ==";
   };
   "chess.js@1.4.0" = fetchurl {
      url = "https://registry.npmjs.org/chess.js/-/chess.js-1.4.0.tgz";
@@ -740,10 +740,6 @@
   "cssstyle@5.3.1" = fetchurl {
      url = "https://registry.npmjs.org/cssstyle/-/cssstyle-5.3.1.tgz";
      hash = "sha512-g5PC9Aiph9eiczFpcgUhd9S4UUO3F+LHGRIi5NUMZ+4xtoIYbHNZwZnWA2JsFGe8OU8nl4WyaEFiZuGuxlutJQ==";
-  };
-  "csstype@3.1.3" = fetchurl {
-     url = "https://registry.npmjs.org/csstype/-/csstype-3.1.3.tgz";
-     hash = "sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==";
   };
   "data-urls@6.0.0" = fetchurl {
      url = "https://registry.npmjs.org/data-urls/-/data-urls-6.0.0.tgz";
@@ -977,6 +973,10 @@
      url = "https://registry.npmjs.org/mongodb/-/mongodb-7.0.0.tgz";
      hash = "sha512-vG/A5cQrvGGvZm2mTnCSz1LUcbOPl83hfB6bxULKQ8oFZauyox/2xbZOoGNl+64m8VBrETkdGCDBdOsCr3F3jg==";
   };
+  "mri@1.2.0" = fetchurl {
+     url = "https://registry.npmjs.org/mri/-/mri-1.2.0.tgz";
+     hash = "sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==";
+  };
   "ms@2.1.2" = fetchurl {
      url = "https://registry.npmjs.org/ms/-/ms-2.1.2.tgz";
      hash = "sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==";
@@ -1104,6 +1104,10 @@
   "rrweb-cssom@0.8.0" = fetchurl {
      url = "https://registry.npmjs.org/rrweb-cssom/-/rrweb-cssom-0.8.0.tgz";
      hash = "sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==";
+  };
+  "sade@1.8.1" = fetchurl {
+     url = "https://registry.npmjs.org/sade/-/sade-1.8.1.tgz";
+     hash = "sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==";
   };
   "safe-buffer@5.2.1" = fetchurl {
      url = "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz";
