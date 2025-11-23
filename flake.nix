@@ -116,6 +116,11 @@
               default = "my-website-backend";
               description = "Group to run the service as";
             };
+            dataDir = mkOption {
+              type = types.str;
+              default = "/var/lib/my-website-backend";
+              description = "Directory to store persistent data like images";
+            };
           };
 
           config = mkIf cfg.enable {
@@ -125,6 +130,10 @@
               description = "My Website Backend user";
             };
             users.groups.${cfg.group} = { };
+
+            systemd.tmpfiles.rules = [
+              "d ${cfg.dataDir} 0750 ${cfg.user} ${cfg.group} - -"
+            ];
 
             systemd.services.my-website-backend = {
               description = "My Website Backend";
