@@ -153,6 +153,7 @@
                 PORT = toString cfg.port;
                 CORS_ORIGINS = concatStringsSep "," cfg.corsOrigins;
                 NODE_ENV = "production";
+                DATA_DIR = cfg.dataDir;
               };
             };
           };
