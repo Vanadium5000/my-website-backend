@@ -9,9 +9,17 @@ import matter from "gray-matter";
 import { JSDOM } from "jsdom";
 import DOMPurify from "dompurify";
 import { rateLimit } from "elysia-rate-limit";
-import { ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
+import { Reaction, Comment } from "../db/models";
 
-const { commentsCollection, reactionsCollection } = await connectToDatabase();
+// Use an async IIFE to handle getting the user collection
+let commentsCollection: Collection<Comment>;
+let reactionsCollection: Collection<Reaction>;
+(async () => {
+  const connection = await connectToDatabase();
+  commentsCollection = connection.commentsCollection;
+  reactionsCollection = connection.reactionsCollection;
+})();
 
 const window = new JSDOM("").window;
 const DOMPurifyInstance = DOMPurify(window);

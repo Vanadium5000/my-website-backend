@@ -1,16 +1,15 @@
 import { Elysia, t } from "elysia";
 import { connectToDatabase } from "../db/connect";
 import { auth } from "../auth";
-import { ObjectId } from "mongodb";
-import {
-  FlashcardDeck,
-  ContentElement,
-  TextContent,
-  MediaContent,
-  Flashcard,
-} from "../db/models";
+import { Collection, ObjectId } from "mongodb";
+import { FlashcardDeck } from "../db/models";
 
-const { flashcardsCollection } = await connectToDatabase();
+// Use an async IIFE to handle getting the user collection
+let flashcardsCollection: Collection<FlashcardDeck>;
+(async () => {
+  const connection = await connectToDatabase();
+  flashcardsCollection = connection.flashcardsCollection;
+})();
 
 // Schemas for OpenAPI
 const ContentElementSchema = t.Union([
