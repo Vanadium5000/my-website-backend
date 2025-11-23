@@ -6,11 +6,10 @@ import { markedHighlight } from "marked-highlight";
 import Prism from "prismjs";
 import { readdirSync, existsSync } from "node:fs";
 import matter from "gray-matter";
-import DOMPurify from "isomorphic-dompurify";
 import { rateLimit } from "elysia-rate-limit";
 import { Collection, ObjectId } from "mongodb";
 import { Reaction, Comment } from "../db/models";
-import { Window } from "happy-dom";
+import sanitizeHtml from "sanitize-html";
 
 // Use an async IIFE to handle getting the user collection
 let commentsCollection: Collection<Comment>;
@@ -272,7 +271,7 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
       }
 
       const renderedContent = await marked(content.trim());
-      const sanitizedContent = DOMPurify.sanitize(renderedContent);
+      const sanitizedContent = sanitizeHtml(renderedContent);
 
       const { insertedId } = await commentsCollection.insertOne({
         blogId: id,
