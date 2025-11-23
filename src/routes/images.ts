@@ -20,6 +20,8 @@ import http from "node:http";
 const { userCollection } = await connectToDatabase();
 const usersCollection = userCollection;
 
+const dataDir = process.env.DATA_DIR || "data";
+
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_COMPRESSED_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_USER_STORAGE = 100 * 1024 * 1024; // 100MB
@@ -126,12 +128,7 @@ async function uploadImage(
     filename = `${userId}_${timestamp}_${sanitized}.${ext}`;
   }
 
-  const filepath = path.join(
-    process.env.DATA_DIR || "",
-    "data",
-    "images",
-    filename
-  );
+  const filepath = path.join(dataDir, "images", filename);
 
   // Ensure directory exists
   await fs.mkdir(path.dirname(filepath), { recursive: true });
@@ -409,7 +406,7 @@ export const imageRoutes = new Elysia({ prefix: "/images" })
       //   return { error: "Access denied: You can only access your own images" };
       // }
 
-      const filepath = path.join("data", "images", imageId);
+      const filepath = path.join(dataDir, "images", imageId);
       try {
         await fs.access(filepath);
         const file = Bun.file(filepath);
@@ -459,7 +456,7 @@ export const imageRoutes = new Elysia({ prefix: "/images" })
         return { error: "Access denied: You can only delete your own images" };
       }
 
-      const filepath = path.join("data", "images", imageId);
+      const filepath = path.join(dataDir, "images", imageId);
 
       try {
         // Get file stats before deleting
