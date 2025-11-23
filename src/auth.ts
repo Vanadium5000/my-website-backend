@@ -4,19 +4,23 @@ import { openAPI, admin } from "better-auth/plugins";
 import { connectToDatabase } from "./db/connect";
 import { sendEmail } from "./utils/email";
 
-const { db } = await connectToDatabase(); // Connect to MongoDB
+// Use an async IIFE to handle the connection
+let db;
+(async () => {
+  const connection = await connectToDatabase();
+  db = connection.db;
+})();
 
 export const auth = betterAuth({
   // baseURL: "http://localhost:3000/auth/api", // Your app's root URL (update for production)
   basePath: "/auth/api", // Matches your mounting; defaults to "/api/auth" otherwise
-  database: mongodbAdapter(db),
+  database: mongodbAdapter(db!),
   plugins: [openAPI(), admin()],
   trustedOrigins: ["http://localhost:5173", "https://my-website.space"],
   user: {
     deleteUser: {
       enabled: true,
     },
-
     additionalFields: {
       // Example custom fields – add as many as needed
       age: {
@@ -111,7 +115,6 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-
       // Explicitly set to match your full mounted callback
       // redirectURI: "http://localhost:3000/auth/api/callback/google",
     },
@@ -129,18 +132,14 @@ export const OpenAPI = {
   getPaths: (prefix = "/auth/api") =>
     getSchema().then(({ paths }) => {
       const reference: typeof paths = Object.create(null);
-
       for (const path of Object.keys(paths)) {
         const key = prefix + path;
         reference[key] = paths[path];
-
         for (const method of Object.keys(paths[path])) {
           const operation = (reference[key] as any)[method];
-
           operation.tags = ["Better Auth"];
         }
       }
-
       return reference;
     }) as Promise<any>,
   components: getSchema().then(({ components }) => components) as Promise<any>,

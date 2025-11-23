@@ -1,14 +1,19 @@
 import { Elysia, t } from "elysia";
-import { connectToDatabase } from "../db/connect";
+import { connectToDatabase, UserDocument } from "../db/connect";
 import { auth } from "../auth";
 import { rateLimit } from "elysia-rate-limit";
-import { ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import { Jimp } from "jimp";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
-const { userCollection } = await connectToDatabase();
-const usersCollection = userCollection;
+// Use an async IIFE to handle getting the user collection
+let usersCollection: Collection<UserDocument>;
+(async () => {
+  const connection = await connectToDatabase();
+  usersCollection = connection.userCollection;
+})();
+
 const dataDir = process.env.DATA_DIR || "data";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_COMPRESSED_SIZE = 2 * 1024 * 1024; // 2MB

@@ -1,9 +1,14 @@
-import { connectToDatabase } from "../db/connect";
-import { ObjectId } from "mongodb";
+import { connectToDatabase, UserDocument } from "../db/connect";
+import { Collection, ObjectId } from "mongodb";
 import { PublicUser } from "../routes/profile";
 import { sendNotification } from "./notifications";
 
-const { userCollection } = await connectToDatabase();
+// Use an async IIFE to handle getting the user collection
+let userCollection: Collection<UserDocument>;
+(async () => {
+  const connection = await connectToDatabase();
+  userCollection = connection.userCollection;
+})();
 
 // Allowed attributes for leaderboards (whitelist for security)
 export const ALLOWED_LEADERBOARD_ATTRIBUTES: Array<keyof PublicUser> = [

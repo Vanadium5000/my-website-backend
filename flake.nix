@@ -25,7 +25,6 @@
           pname = "my-website-backend";
           version = "1.0.50";
           src = ./.;
-          packageJson = ./package.json;
           module = "src/index.ts";
 
           # Compile command:

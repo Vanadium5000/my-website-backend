@@ -1,5 +1,5 @@
-import { connectToDatabase } from "../db/connect";
-import { ObjectId } from "mongodb";
+import { connectToDatabase, UserDocument } from "../db/connect";
+import { Collection, ObjectId } from "mongodb";
 import { sendEmail } from "./email";
 import {
   sendNotificationEvent,
@@ -16,7 +16,12 @@ if (vapidPublicKey && vapidPrivateKey && vapidSubject) {
   webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 }
 
-const { userCollection } = await connectToDatabase();
+// Use an async IIFE to handle getting the user collection
+let userCollection: Collection<UserDocument>;
+(async () => {
+  const connection = await connectToDatabase();
+  userCollection = connection.userCollection;
+})();
 
 // Cooldown map: eventType -> lastSentTime
 const notificationCooldowns = new Map<string, number>();

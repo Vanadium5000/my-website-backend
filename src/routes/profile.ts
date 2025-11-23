@@ -1,8 +1,8 @@
 import { Elysia, t } from "elysia";
 import { getPublicUser, updateHighScore } from "../utils/profile";
 import { auth } from "../auth";
-import { connectToDatabase } from "../db/connect";
-import { ObjectId } from "mongodb";
+import { connectToDatabase, UserDocument } from "../db/connect";
+import { Collection, ObjectId } from "mongodb";
 
 export const PublicUserSchema = t.Object({
   id: t.String(),
@@ -205,7 +205,12 @@ export const profileRoutes = new Elysia({ prefix: "/profile" })
   .model({ PublicUser: PublicUserSchema });
 
 // Database connection for admin routes
-const { userCollection } = await connectToDatabase();
+// Use an async IIFE to handle getting the user collection
+let userCollection: Collection<UserDocument>;
+(async () => {
+  const connection = await connectToDatabase();
+  userCollection = connection.userCollection;
+})();
 
 const UnverifiedProfileSchema = t.Object({
   id: t.String(),
