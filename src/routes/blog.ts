@@ -6,11 +6,11 @@ import { markedHighlight } from "marked-highlight";
 import Prism from "prismjs";
 import { readdirSync, existsSync } from "node:fs";
 import matter from "gray-matter";
-import { JSDOM } from "jsdom";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 import { rateLimit } from "elysia-rate-limit";
 import { Collection, ObjectId } from "mongodb";
 import { Reaction, Comment } from "../db/models";
+import { Window } from "happy-dom";
 
 // Use an async IIFE to handle getting the user collection
 let commentsCollection: Collection<Comment>;
@@ -20,9 +20,6 @@ let reactionsCollection: Collection<Reaction>;
   commentsCollection = connection.commentsCollection;
   reactionsCollection = connection.reactionsCollection;
 })();
-
-const window = new JSDOM("").window;
-const DOMPurifyInstance = DOMPurify(window);
 
 marked.use(
   markedHighlight({
@@ -275,7 +272,7 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
       }
 
       const renderedContent = await marked(content.trim());
-      const sanitizedContent = DOMPurifyInstance.sanitize(renderedContent);
+      const sanitizedContent = DOMPurify.sanitize(renderedContent);
 
       const { insertedId } = await commentsCollection.insertOne({
         blogId: id,
