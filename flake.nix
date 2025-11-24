@@ -133,7 +133,7 @@
                 User = cfg.user;
                 Group = cfg.group;
                 WorkingDirectory = cfg.package;
-                ExecStart = "${pkgs.bun}/bin/bun run ${cfg.package}/src/index.ts";
+                ExecStart = "${cfg.package}/bin/my-website-backend";
                 EnvironmentFile = cfg.envFile;
                 Restart = "always";
                 RestartSec = 5;
