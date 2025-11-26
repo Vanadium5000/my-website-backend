@@ -4,7 +4,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    bun2nix.url = "github:nix-community/bun2nix";
   };
 
   outputs =
@@ -12,31 +11,32 @@
       self,
       nixpkgs,
       flake-utils,
-      bun2nix,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        inherit (bun2nix.packages.${system}.default) mkDerivation fetchBunDeps;
 
-        backendPackage = mkDerivation {
+        backendPackage = pkgs.stdenv.mkDerivation {
           pname = "my-website-backend";
           version = "1.0.50";
-          src = ./.;
-          module = "src/index.ts";
 
-          # Compile command:
-          # nix run github:nix-community/bun2nix -- --lock-file bun.lock --output-file bun.nix
-          bunDeps = fetchBunDeps {
-            bunNix = ./bun.nix;
-          };
+          src = ./.;
+
+          installPhase = ''
+            mkdir -p $out/
+            mkdir -p $out/bin/
+            cp -r . $out/
+            # bun build --compile --no-compile-autoload-dotenv --minify ./src/index.ts --outfile my-website-backend
+            cp ./my-website-backend $out/bin/my-website-backend
+            chmod +x $out/bin/my-website-backend
+          '';
 
           meta = with pkgs.lib; {
-            description = "Backend for my-website";
+            description = "My Website Backend";
             license = licenses.mit;
-            maintainers = [ ];
+            mainProgram = "my-website-backend";
           };
         };
       in
@@ -133,7 +133,7 @@
                 User = cfg.user;
                 Group = cfg.group;
                 WorkingDirectory = cfg.package;
-                ExecStart = "${cfg.package}/bin/my-website-backend";
+                ExecStart = "${cfg.package}/bin/my-website-backend run .";
                 EnvironmentFile = cfg.envFile;
                 Restart = "always";
                 RestartSec = 5;

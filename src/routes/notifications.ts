@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { auth } from "../auth";
-import { connectToDatabase, UserDocument } from "../db/connect";
-import { Collection, ObjectId } from "mongodb";
+import { connectToDatabase } from "../db/connect";
+import { ObjectId } from "mongodb";
 
 const SubscriptionSchema = t.Object({
   id: t.String(),
@@ -40,12 +40,7 @@ const UnsubscribeRequestSchema = t.Object({
 });
 
 // Database connection for routes
-// Use an async IIFE to handle getting the user collection
-let userCollection: Collection<UserDocument>;
-(async () => {
-  const connection = await connectToDatabase();
-  userCollection = connection.userCollection;
-})();
+const { userCollection } = await connectToDatabase();
 
 export const notificationsRoutes = new Elysia({ prefix: "/notifications" })
   .derive(async ({ request: { headers } }) => {

@@ -1,7 +1,7 @@
 import { Socket, Namespace } from "socket.io";
 import { auth } from "../auth";
 import { connectToDatabase } from "../db/connect";
-import { Collection, ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 import {
   QuizspirePlayer,
   QuizspireSettings,
@@ -12,12 +12,7 @@ import {
   ContentElement,
 } from "../db/models";
 
-// Use an async IIFE to handle getting the user collection
-let flashcardsCollection: Collection<FlashcardDeck>;
-(async () => {
-  const connection = await connectToDatabase();
-  flashcardsCollection = connection.flashcardsCollection;
-})();
+const { flashcardsCollection } = await connectToDatabase();
 
 const lobbies = new Map<string, QuizspireLobby>(); // code -> lobby
 const activeGames = new Map<string, QuizspireGame>(); // code -> game

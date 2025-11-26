@@ -1,10 +1,12 @@
 // Backend: src/index.ts (main entry point with Socket.IO CORS added)
+
 import { Elysia } from "elysia";
 import { connectToDatabase } from "./db/connect";
 import { openapi } from "@elysiajs/openapi";
 import { cors } from "@elysiajs/cors";
 import { Server } from "socket.io";
 import { Server as Engine } from "@socket.io/bun-engine";
+
 import { auth, OpenAPI } from "./auth";
 import { setupChess } from "./webhooks/chess"; // Modularized chess logic
 import { setupConnections } from "./webhooks/connections"; // Modularized connections logic
@@ -20,6 +22,9 @@ import { notificationsRoutes } from "./routes/notifications";
 import { quizspireRoutes } from "./routes/quizspire";
 import { rateLimit } from "elysia-rate-limit";
 import { ip } from "elysia-ip";
+
+await connectToDatabase(); // Connect to MongoDB on startup
+
 const app = new Elysia()
   // Derive IP early (adds { ip } to context)
   .use(ip())
@@ -30,16 +35,14 @@ const app = new Elysia()
       generator: (req, server, { ip }) => ip, // Custom generator as getting IP on BunJS is different
     })
   ) // Global: 100 reqs/min per IP
-  .use(async () => {
-    const components = await OpenAPI.components;
-    const paths = await OpenAPI.getPaths();
-    return openapi({
+  .use(
+    openapi({
       documentation: {
-        components,
-        paths,
+        components: await OpenAPI.components,
+        paths: await OpenAPI.getPaths(),
       },
-    });
-  })
+    })
+  )
   .use(
     cors({
       origin: process.env.CORS_ORIGINS
@@ -71,9 +74,11 @@ const io = new Server({
   },
 });
 io.bind(engine);
+
 setupChess(io.of("/sockets/chess")); // Set up chess handlers on /sockets/chess
 setupConnections(io.of("/sockets/connection")); // Set up connections on /sockets/connection
 setupQuizspire(io.of("/sockets/quizspire")); // Set up quizspire handlers on /sockets/quizspire
+
 export default {
   port: parseInt(process.env.PORT || "3000"),
   idleTimeout: 30, // Adjust based on your needs (must exceed pingInterval)
@@ -87,6 +92,7 @@ export default {
   },
   websocket,
 };
+
 console.log(`🦊 Elysia is running at http://localhost:3000`);
 console.log(
   `📚 OpenAPI documentation available at http://localhost:3000/openapi`
