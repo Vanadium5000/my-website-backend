@@ -26,6 +26,15 @@
 
           nativeBuildInputs = [ pkgs.unzip ];
 
+          # Prevent Nix breaking the binary by patching it
+          dontPatchELF = true;
+          dontStrip = true;
+          autoPatchelf = false;
+          dontWrap = true;
+          preFixup = "true"; # skip preFixup hook
+          postFixup = ""; # skip postFixup hook
+          fixupPhase = "true"; # completely skip the whole fixupPhase
+
           installPhase = ''
             mkdir -p $out/
             mkdir -p $out/bin/
