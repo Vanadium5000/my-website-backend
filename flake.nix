@@ -117,6 +117,9 @@
           };
 
           config = mkIf cfg.enable {
+            # Fix running bun executables
+            programs.nix-ld.enable = true;
+
             users.users.${cfg.user} = {
               isSystemUser = true;
               group = cfg.group;
@@ -137,7 +140,7 @@
                 User = cfg.user;
                 Group = cfg.group;
                 WorkingDirectory = cfg.package;
-                ExecStart = "${cfg.package}/bin/my-website-backend run .";
+                ExecStart = "${cfg.package}/bin/my-website-backend";
                 EnvironmentFile = cfg.envFile;
                 Restart = "always";
                 RestartSec = 5;
