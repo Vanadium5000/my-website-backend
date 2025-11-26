@@ -32,7 +32,7 @@
             cp -r . $out/
             unzip my-website-backend.zip
 
-            # bun build --compile --no-compile-autoload-dotenv --minify ./src/index.ts --outfile my-website-backend
+            # bun build --compile --no-compile-autoload-dotenv --minify ./src/index.ts --outfile my-website-backend --target=bun
             cp ./my-website-backend $out/bin/my-website-backend
             chmod +x $out/bin/my-website-backend
           '';
