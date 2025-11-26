@@ -6,16 +6,12 @@ import { markedHighlight } from "marked-highlight";
 import Prism from "prismjs";
 import { readdirSync, existsSync } from "node:fs";
 import matter from "gray-matter";
-import { JSDOM } from "jsdom";
-import DOMPurify from "dompurify";
 import { rateLimit } from "elysia-rate-limit";
-import { ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
+import { Reaction, Comment } from "../db/models";
+import sanitizeHtml from "sanitize-html";
 
 const { commentsCollection, reactionsCollection } = await connectToDatabase();
-
-const window = new JSDOM("").window;
-const DOMPurifyInstance = DOMPurify(window);
-
 marked.use(
   markedHighlight({
     highlight: (code, lang) => {
@@ -267,7 +263,7 @@ export const blogRoutes = new Elysia({ prefix: "/blog" })
       }
 
       const renderedContent = await marked(content.trim());
-      const sanitizedContent = DOMPurifyInstance.sanitize(renderedContent);
+      const sanitizedContent = sanitizeHtml(renderedContent);
 
       const { insertedId } = await commentsCollection.insertOne({
         blogId: id,

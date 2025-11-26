@@ -24,10 +24,14 @@
 
           src = ./.;
 
+          nativeBuildInputs = [ pkgs.unzip ];
+
           installPhase = ''
             mkdir -p $out/
             mkdir -p $out/bin/
             cp -r . $out/
+            unzip my-website-backend.zip
+
             # bun build --compile --no-compile-autoload-dotenv --minify ./src/index.ts --outfile my-website-backend
             cp ./my-website-backend $out/bin/my-website-backend
             chmod +x $out/bin/my-website-backend
