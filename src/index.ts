@@ -20,6 +20,7 @@ import { leaderboardsRoutes } from "./routes/leaderboards";
 import { connectionsRoutes } from "./routes/connections"; // Admin routes for connections
 import { notificationsRoutes } from "./routes/notifications";
 import { quizspireRoutes } from "./routes/quizspire";
+import { foldersRoutes } from "./routes/folders";
 import { rateLimit } from "elysia-rate-limit";
 import { ip } from "elysia-ip";
 
@@ -63,6 +64,7 @@ const app = new Elysia()
   .use(connectionsRoutes) // Mounts the connections admin routes
   .use(notificationsRoutes) // Mounts the notifications routes
   .use(quizspireRoutes) // Mounts the quizspire routes
+  .use(foldersRoutes) // Mounts the folders routes
   .get("/", () => "hi")
   .get("/me", async ({ request: { headers } }) => {
     return await auth.api.getSession({ headers });

@@ -92,6 +92,11 @@ export const auth = betterAuth({
         type: "json",
         required: false,
       },
+      allowedFolders: {
+        type: "json", // Array of folder names
+        required: false,
+        default: [],
+      },
     },
   },
   emailVerification: {
